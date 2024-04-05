@@ -1,7 +1,7 @@
 const fs  = require('fs');
 const http = require('http');
 const url = require('url');
-
+const replaceTemplate = require('./modules/replaceTemplate');
 
 /****************************
  * FILES
@@ -41,27 +41,12 @@ const productTemplate = fs.readFileSync(`${__dirname}/templates/template-product
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
 const dataObj = JSON.parse(data);
 
-const replaceTemplate = (template, product) => {
-    let output = template.replace(/{%PRODUCTNAME%}/g, product.productName)
-    .replace(/{%IMAGE%}/g, product.image)
-    .replace(/{%PRICE%}/g, product.price)
-    .replace(/{%FROM%}/g, product.from)
-    .replace(/{%NUTRIENTS%}/g, product.nutrients)
-    .replace(/{%QUANTITY%}/g, product.quantity)
-    .replace(/{%DESCRIPTION%}/g, product.description)
-    .replace(/{%ID%}/g, product.id);
-
-    if(!product.organic) output = output.replace(/{%NOT_ORGANIC%}/g, 'not-organic');
-    
-    return output;
-}
-
 const server = http.createServer((req, res) => {
-    const pathName = req.url;
+    const { query, pathname } = url.parse(req.url, true);
 
     // Overview Page
-    if(pathName === '/' || pathName === '/overview') {
-        res.writeHead(200, {'Content-type': 'text/html'});
+    if(pathname === '/' || pathname === '/overview') {
+        res.writeHead(200, { 'Content-type': 'text/html' });
 
         const cardsHtml = dataObj
         .map((el) => replaceTemplate(cardTemplate, el))
@@ -73,11 +58,16 @@ const server = http.createServer((req, res) => {
         res.end(output);
     
     // Product Page
-    } else if(pathName === '/product') {
-        res.end('This is the PRODUCT');
+    } else if(pathname === '/product') {
+        res.writeHead(200, { 'Content-type': 'text/html' });
+
+        const product = dataObj[query.id];
+        const output = replaceTemplate(productTemplate, product);
+
+        res.end(output);
 
     // API
-    } else if(pathName === '/api') {
+    } else if(pathname === '/api') {
         res.writeHead(200, {'Content-type': 'application/json'});
         res.end(data);
 
