@@ -1,5 +1,6 @@
 module.exports = (template, product) => {
-    let output = template.replace(/{%PRODUCTNAME%}/g, product.productName)
+  let output = template
+    .replace(/{%PRODUCTNAME%}/g, product.productName)
     .replace(/{%IMAGE%}/g, product.image)
     .replace(/{%PRICE%}/g, product.price)
     .replace(/{%FROM%}/g, product.from)
@@ -8,7 +9,8 @@ module.exports = (template, product) => {
     .replace(/{%DESCRIPTION%}/g, product.description)
     .replace(/{%ID%}/g, product.id);
 
-    if(!product.organic) output = output.replace(/{%NOT_ORGANIC%}/g, 'not-organic');
-    
-    return output;
-}
+  if (!product.organic)
+    output = output.replace(/{%NOT_ORGANIC%}/g, 'not-organic');
+
+  return output;
+};
